@@ -6,8 +6,8 @@ import espnow
 from machine import Pin, ADC, Timer
 
 # 本地库
-import gamepad
-import lcd
+import modules.gamepad as gamepad
+import modules.lcd as lcd
 
 time.sleep(1)  # 防止点停止按钮后马上再启动导致 Thonny 连接不上
 

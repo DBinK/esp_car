@@ -5,7 +5,7 @@ import espnow
 import network
 from machine import Pin
 
-from car.modules.motion import RobotController
+from modules.motion import RobotController
 
 time.sleep(1)  # 防止点停止按钮后马上再启动导致 Thonny 连接不上
 
