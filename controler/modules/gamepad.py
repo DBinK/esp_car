@@ -55,8 +55,9 @@ class Gamepad:
     def __init__(self, debug=False):
         self.debug = debug
         self.init_inputs()
+
         # id, lx, ly, rx, ry, abxy & dpad, ls & rs & start & back, mode
-        self.data = [1, 0,0, 0,0, 8,0, 6] 
+        self.data = [1, 0,0, 0,0, 8,0, 6]  # 默认数据举例
 
     def set_bit(self, num, bit_position, value):
         """
@@ -117,55 +118,57 @@ class Gamepad:
         self.data[5] = self.data[5] & 0b11110000  # 清除方向键
         self.data[5] = self.data[5] | self.DIRECTION_MAP.get(key_state, 8)  # 设置方向键
 
-
+    # 按键消抖时间
+    key_timeout = 100_000
+    
     # 方向键回调函数
-    @debounce(1_000_000)
+    @debounce(key_timeout)
     def up_callback(self, KEY):
         self.update_direction() 
 
-    @debounce(1_000_000)
+    @debounce(key_timeout)
     def down_callback(self, KEY):
         self.update_direction()
 
-    @debounce(1_000_000)
+    @debounce(key_timeout)
     def left_callback(self, KEY):
         self.update_direction()
 
-    @debounce(1_000_000)
+    @debounce(key_timeout)
     def right_callback(self, KEY):
         self.update_direction()
 
     # XABY 按键回调函数
-    @debounce(5_000_000)
+    @debounce(key_timeout)
     def a_callback(self, KEY):
         self.data[5] = self.set_bit(self.data[5], 6, KEY.value())
 
-    @debounce(5_000_000)
+    @debounce(key_timeout)
     def b_callback(self, KEY):
         self.data[5] = self.set_bit(self.data[5], 5, KEY.value())
 
-    @debounce(5_000_000)
+    @debounce(key_timeout)
     def x_callback(self, KEY):
         self.data[5] = self.set_bit(self.data[5], 7, KEY.value())
 
-    @debounce(5_000_000)
+    @debounce(key_timeout)
     def y_callback(self, KEY):
         self.data[5] = self.set_bit(self.data[5], 4, KEY.value())
 
     # L R & Start & Back 回调函数
-    @debounce(5_000_000)
+    @debounce(key_timeout)
     def l1_callback(self, KEY):
         self.data[6] = self.set_bit(self.data[6], 7, KEY.value())
 
-    @debounce(5_000_000)
+    @debounce(key_timeout)
     def r1_callback(self, KEY):
         self.data[6] = self.set_bit(self.data[6], 6, KEY.value())
 
-    @debounce(5_000_000)
+    @debounce(key_timeout)
     def start_callback(self, KEY):
         self.data[6] = self.set_bit(self.data[6], 5, KEY.value())
 
-    @debounce(5_000_000)
+    @debounce(key_timeout)
     def select_callback(self, KEY):
         self.data[6] = self.set_bit(self.data[6], 4, KEY.value())
     
