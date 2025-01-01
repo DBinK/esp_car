@@ -14,7 +14,7 @@ tft.text(
 )
 tft.fill(0)
 
-def show_gamepad(data, binary_data):
+def show_gamepad(data, bin_str):
     tft.text(
         font,
         f"L-XY: {data[1], data[2]} ",
@@ -40,11 +40,11 @@ def show_gamepad(data, binary_data):
         f"other: {bin(data[6])}",
         10, 150
     )
-    # tft.text(
-    #     font,
-    #     f"bin: {bin(int.from_bytes(binary_data, byteorder='big'))}",
-    #     10, 40
-    # )
+    tft.text(
+        font,
+        f"bin: {bin_str}",
+        10, 180
+    )
 
 if __name__ == "__main__":
     data = [1, 111,222, 112,221, 8,0, 6]

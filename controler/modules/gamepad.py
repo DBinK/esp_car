@@ -181,8 +181,7 @@ class Gamepad:
         """ 将列表转换为二进制字符串 """
         format_string = 'B' * len(data_list)  # 设每个元素是一个8位无符号整数
         binary_data = struct.pack(format_string, *data_list)  # 打包成二进制数据
-        # binary_string = bin(int.from_bytes(binary_data, byteorder='big'))  # 转换字符串
-
+        
         return binary_data
 
     def read_bin(self):

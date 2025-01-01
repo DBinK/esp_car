@@ -46,21 +46,23 @@ def data_to_json(data):
 
 def main(tim_callback):
 
-    data_bin = gamepad.read_bin()
+    binary_data = gamepad.read_bin()
     data = gamepad.data
-    
-    lcd.show_gamepad(data, data_bin)  # 在lcd显示数据
+
+    bin_str = hex(int.from_bytes(binary_data, 'big'))
+
+    lcd.show_gamepad(data, bin_str)   # 在lcd显示数据
 
     # data_json = data_to_json(data)  # 将数据转换为 JSON 字符串并发送
 
-    data_json = json.dumps(data)  # 将列表直接转换为 JSON 字符串
+    data_json = json.dumps(data)      # 将列表直接转换为 JSON 字符串
 
-    now.send(peer, data_json)
+    now.send(peer, data_json) 
 
-    print(f"发送数据: {data}")
+    print(f"发送数据: {data}") 
 
-    diff = main_dt.time_diff()
-    
+    diff = main_dt.time_diff() 
+     
     print(f"延迟ms: {diff / 1000_000}, 频率Hz: {1_000_000_000 / diff}")
 
 
