@@ -10,13 +10,16 @@ from machine import Pin
 time.sleep(1)  # 防止点停止按钮后马上再启动导致 Thonny 连接不上
 
 # 释放所有GPIO, 断电重上电不再失控
+
+print(f"releasing gpio")
+
 def release_all_GPIO():
     for i in range(0, 49):
         try:
             GND = Pin(i, Pin.OUT, value=0)
-            print(f"releasing gpio {i}")
+            print(f"{i}")
         except:
-            print(f"skip gpio {i}")
+            print(f"skip {i}")
             continue
 
 release_all_GPIO()
