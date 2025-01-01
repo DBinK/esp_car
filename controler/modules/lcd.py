@@ -1,43 +1,45 @@
 
-import random
 import lib.tft_config as tft_config
-import lib.st7789py as st7789
+import lib.vga1_8x16 as font
 
+tft = tft_config.config(tft_config.WIDE)
 
-def main():
-    """ main """
-    print("Starting...")
-    tft = tft_config.config(tft_config.WIDE)
+tft.rotation(0)
+tft.fill(0)
 
-    while True:
-        print("loop...")
-        color = st7789.color565(
-            random.getrandbits(8), random.getrandbits(8), random.getrandbits(8)
-        )
+tft.text(
+    font,
+    f"Hello gamepad!",
+    10, 10
+)
 
-        print("draw line")
-        tft.line(
-            random.randint(0, tft.width),
-            random.randint(0, tft.height),
-            random.randint(0, tft.width),
-            random.randint(0, tft.height),
-            color,
-        )
+def show_gamepad(data, binary_data):
+    tft.text(
+        font,
+        f"raw: {data} ",
+        10, 10
+    )
+    # tft.text(
+    #     font,
+    #     f"bin: {bin(int.from_bytes(binary_data, byteorder='big'))}",
+    #     10, 40
+    # )
+    tft.text(
+        font,
+        f"xaby: {bin((data[5] & 0b11110000) >> 4)}",
+        10, 40
+    )
+    tft.text(
+        font,
+        f"other: {bin(data[6])}",
+        10, 70
+    )
+    tft.text(
+        font,
+        f"dpad: {bin(data[5] & 0b00001111)}",
+        10, 100
+    )
 
-        print("draw rect")
-        width = random.randint(0, tft.width // 2)
-        height = random.randint(0, tft.height // 2)
-        col = random.randint(0, tft.width - width)
-        row = random.randint(0, tft.height - height)
-        tft.fill_rect(
-            col,
-            row,
-            width,
-            height,
-            st7789.color565(
-                random.getrandbits(8), random.getrandbits(8), random.getrandbits(8)
-            ),
-        )
-
-
-main()
+if __name__ == "__main__":
+    data = [1, 111,222, 112,221, 8,0, 6]
+    show_gamepad(data)

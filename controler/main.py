@@ -8,6 +8,7 @@ from machine import Pin, ADC, Timer
 # 本地库
 import modules.gamepad as gamepad
 import modules.lcd as lcd
+from modules.utils import debounce, TimeDiff
 
 time.sleep(1)  # 防止点停止按钮后马上再启动导致 Thonny 连接不上
 
@@ -24,38 +25,7 @@ now.add_peer(peer)
 
 # 构建手柄对象
 gamepad = gamepad.Gamepad()
-
-def debounce(delay_ns):
-    """装饰器: 防止函数在指定时间内被重复调用"""
-    def decorator(func):
-        last_call_time = 0
-        result = None
-
-        def wrapper(*args, **kwargs):
-            nonlocal last_call_time, result
-            current_time = time.time_ns()
-            if current_time - last_call_time > delay_ns:
-                last_call_time = current_time
-                result = func(*args, **kwargs)
-            return result
-
-        return wrapper
-
-    return decorator
-
-def time_diff(last_time=[None]):
-    """计算两次调用之间的时间差，单位为微秒。"""
-    current_time = time.ticks_us()  # 获取当前时间（单位：微秒）
-
-    if last_time[0] is None:  # 如果是第一次调用，更新last_time
-        last_time[0] = current_time
-        return 0.000_001  # 防止除零错误
-
-    else:  # 计算时间差
-        diff = time.ticks_diff(current_time, last_time[0])  # 计算时间差
-        last_time[0] = current_time  # 更新上次调用时间
-        return diff  # 返回时间差us
-
+main_dt = TimeDiff()
 
 def data_to_json(data):
     data_dict = {
@@ -68,25 +38,30 @@ def data_to_json(data):
         "LS/RS/Start/Back": data[6],
         "mode": data[7],
     }
-
+    
+    print(data_dict)
+    
     return json.dumps(data_dict)
 
 
 def main(tim_callback):
 
-    data = gamepad.read()
-    lcd.show_gamepad(data)  # 在lcd显示数据
+    data_bin = gamepad.read_bin()
+    data = gamepad.data
+    
+    lcd.show_gamepad(data, data_bin)  # 在lcd显示数据
 
-    # data_json = data_to_json(data)  # 将数据转换为 JSON 字符串并发送
+    data_json = data_to_json(data)  # 将数据转换为 JSON 字符串并发送
 
-    data_json = json.dumps(data)  # 将列表直接转换为 JSON 字符串
+    # data_json = json.dumps(data)  # 将列表直接转换为 JSON 字符串
 
     now.send(peer, data_json)
 
     print(f"发送数据: {data_json}")
 
-    diff = time_diff()
-    print(f"延迟us: {diff}, 频率Hz: {1_000_000 / diff}")
+    diff = main_dt.time_diff()
+    
+    print(f"延迟ms: {diff / 1000_000}, 频率Hz: {1_000_000_000 / diff}")
 
 
 # 开启定时器

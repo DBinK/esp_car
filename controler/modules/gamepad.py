@@ -1,7 +1,8 @@
-from machine import Pin, ADC
 import time
+import struct
+from machine import Pin, ADC
 
-
+from modules.utils import debounce, map_value
 
 
 class Button:
@@ -26,22 +27,27 @@ class Joystick:
         self.y_pin = y_pin
         self.x_axis = ADC(Pin(self.x_pin))
         self.y_axis = ADC(Pin(self.y_pin))
-        # self.x_axis.atten(ADC.ATTN_11DB)  # 按需开启衰减器，测量量程增大到3.3V
-        # self.y_axis.atten(ADC.ATTN_11DB)
+        self.x_axis.atten(ADC.ATTN_0DB)  # 按需开启衰减器，测量量程增大到3.3V
+        self.y_axis.atten(ADC.ATTN_0DB)
 
     def read_raw(self):
         try:
             x_value = self.x_axis.read()
             y_value = self.y_axis.read()
             return x_value, y_value
+        
         except Exception as e:
             print(f"Error reading ADC values: {e}")
             return 0, 0
     
     def read(self): 
         x_value, y_value = self.read_raw()
+        
         x_value = int(map_value(self, x_value, (0, 4095), (0, 255)))
         y_value = int(map_value(self, y_value, (0, 4095), (0, 255)))
+
+        # print(f"x_value: {x_value}, y_value: {y_value}")  # 输出摇杆数据
+        
         return x_value, y_value  # uint8
 
 
@@ -163,20 +169,36 @@ class Gamepad:
     def select_callback(self, KEY):
         self.data[6] = self.set_bit(self.data[6], 4, KEY.value())
     
-    # 读取数据
     def read(self) -> list:
+        """ 读取数据 """
         self.data[1], self.data[2] = self.ls.read()
         self.data[3], self.data[4] = self.rs.read()
 
         return self.data
+    
 
+    def list_to_binary_string(self, data_list):
+        """ 将列表转换为二进制字符串 """
+        format_string = 'B' * len(data_list)  # 设每个元素是一个8位无符号整数
+        binary_data = struct.pack(format_string, *data_list)  # 打包成二进制数据
+        # binary_string = bin(int.from_bytes(binary_data, byteorder='big'))  # 转换字符串
+
+        return binary_data
+
+    def read_bin(self):
+        """ 读取二进制数据 """
+        return self.list_to_binary_string(self.read())
+    
+    
 if __name__ == "__main__":
 
     gamepad = Gamepad()
 
     while True: 
-        data = gamepad.read()
+        data_bin = gamepad.read_bin()
+        data = gamepad.data
 
+        # print(f"bin: {data_bin}")
         print(f"raw: {data}, xaby: {bin((data[5] & 0b11110000) >> 4)}, other: {bin(data[6])}, dpad: {bin(data[5] & 0b00001111)}" )
 
         time.sleep(0.1)
