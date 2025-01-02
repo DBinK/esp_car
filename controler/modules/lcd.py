@@ -11,7 +11,7 @@ tft.fill(0)
 
 tft.text(
     font,
-    "Hello gamepad!",
+    "Hello GamePad!",
     80, 200
 )
 tft.fill(0)
