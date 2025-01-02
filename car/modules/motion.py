@@ -69,7 +69,7 @@ class RobotController:
             
         return v1, v2, v3, v4  # 返回处理后的速度值
 
-    def move(self, v_y, v_x, v_w): 
+    def move(self, v_x, v_y, v_w): 
         """ 输入期望运动状态, 输出电机所需的运动速度 """
 
         # 运动学解算 
@@ -129,36 +129,36 @@ if __name__ == "__main__":
 
     robot = RobotController()
 
-    # robot.move(0, 80, 0)
+    robot.move(0, 0, 20)
 
-    print("测试rf轮")
-    robot.motor_rf_test(20)
-    time.sleep(3)
-    robot.motor_rf_test(-20)
-    time.sleep(3)
-    robot.motor_rf_test(0)
-    time.sleep(1)
+    # print("测试rf轮")
+    # robot.motor_rf_test(20)
+    # time.sleep(3)
+    # robot.motor_rf_test(-20)
+    # time.sleep(3)
+    # robot.motor_rf_test(0)
+    # time.sleep(1)
 
-    print("测试rb轮")
-    robot.motor_rb_test(50)
-    time.sleep(3)
-    robot.motor_rb_test(-50)
-    time.sleep(3)
-    robot.motor_rb_test(0)
-    time.sleep(1)
+    # print("测试rb轮")
+    # robot.motor_rb_test(50)
+    # time.sleep(3)
+    # robot.motor_rb_test(-50)
+    # time.sleep(3)
+    # robot.motor_rb_test(0)
+    # time.sleep(1)
 
-    print("测试lf轮")
-    robot.motor_lf_test(50)
-    time.sleep(3)
-    robot.motor_lf_test(-50)
-    time.sleep(3)
-    robot.motor_lf_test(0)
-    time.sleep(1)
+    # print("测试lf轮")
+    # robot.motor_lf_test(50)
+    # time.sleep(3)
+    # robot.motor_lf_test(-50)
+    # time.sleep(3)
+    # robot.motor_lf_test(0)
+    # time.sleep(1)
 
-    print("测试lb轮")
-    robot.motor_lb_test(50)
-    time.sleep(3)
-    robot.motor_lb_test(-50)
-    time.sleep(3)
-    robot.motor_lb_test(0)
-    time.sleep(1)
+    # print("测试lb轮")
+    # robot.motor_lb_test(50)
+    # time.sleep(3)
+    # robot.motor_lb_test(-50)
+    # time.sleep(3)
+    # robot.motor_lb_test(0)
+    # time.sleep(1)
