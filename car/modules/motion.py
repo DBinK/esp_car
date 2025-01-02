@@ -73,19 +73,19 @@ class RobotController:
         """ 输入期望运动状态, 输出电机所需的运动速度 """
 
         # 运动学解算 
-        v1 = v_y + v_x - v_w
-        v2 = v_y - v_x - v_w
-        v3 = v_y - v_x + v_w
-        v4 = v_y + v_x + v_w
+        v_lf = v_x - v_y - v_w
+        v_rf = v_x + v_y + v_w
+        v_lb = v_x + v_y - v_w
+        v_rb = v_x - v_y + v_w
 
         # 限制速度
-        v1, v2, v3, v4 = self.scale_speed(v1, v2, v3, v4)
+        v_lf, v_rf, v_lb, v_rb = self.scale_speed(v_lf, v_rf, v_lb, v_rb)
 
         # 设置电机速度
-        self.motor_lf.set_speed(v1)
-        self.motor_lb.set_speed(v2)
-        self.motor_rf.set_speed(v3)
-        self.motor_rb.set_speed(v4)
+        self.motor_lf.set_speed(v_lf)
+        self.motor_rf.set_speed(v_rf)
+        self.motor_lb.set_speed(v_lb)
+        self.motor_rb.set_speed(v_rb)
 
     # 封装一些简单运动的控制方法
     def go_forward(self, rate):
@@ -129,11 +129,12 @@ if __name__ == "__main__":
 
     robot = RobotController()
 
+    # robot.move(0, 80, 0)
 
     print("测试rf轮")
-    robot.motor_rf_test(50)
+    robot.motor_rf_test(20)
     time.sleep(3)
-    robot.motor_rf_test(-50)
+    robot.motor_rf_test(-20)
     time.sleep(3)
     robot.motor_rf_test(0)
     time.sleep(1)
