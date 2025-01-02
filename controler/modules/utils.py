@@ -19,6 +19,17 @@ def debounce(delay_ns):
 
     return decorator
 
+def timeit(func):
+    """装饰器: 测量函数执行时间, 优化性能的时候测试用"""
+    def wrapper(*args, **kwargs):
+        start_time = time.time_ns()  # 获取当前时间（纳秒）
+        result = func(*args, **kwargs)  # 调用被装饰的函数
+        end_time = time.time_ns()  # 获取结束时间（纳秒）
+        execution_time = end_time - start_time  # 计算执行时间
+        print(f"Function '{func.__name__}' took {execution_time / 1_000_000} ms to execute")
+        return result  # 返回函数的结果
+    return wrapper
+
 
 # 数据处理函数
 def limit_value(value, min_value=-3000, max_value=3000):

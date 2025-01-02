@@ -2,6 +2,7 @@
 import time
 import json
 import network
+import asyncio
 import espnow
 from machine import Pin, ADC, Timer
 
@@ -27,6 +28,9 @@ now.add_peer(peer)
 gamepad = gamepad.Gamepad()
 main_dt = TimeDiff()
 
+gamepad_data = []
+binary_data  = gamepad.read_bin()
+
 def data_to_json(data):
     data_dict = {
         "ID": data[0],
@@ -44,43 +48,43 @@ def data_to_json(data):
     return json.dumps(data_dict)
 
 
-def main(tim_callback):
+async def show_lcd():
+    global binary_data, gamepad_data
 
-    binary_data = gamepad.read_bin()
-    data = gamepad.data
+    while True:
+        binary_str = hex(int.from_bytes(binary_data, 'big'))
 
-    bin_str = hex(int.from_bytes(binary_data, 'big'))
+        lcd.show_gamepad(gamepad_data, binary_str)   # 在lcd显示数据
 
-    lcd.show_gamepad(data, bin_str)   # 在lcd显示数据
+        await asyncio.sleep(0.1) 
 
-    # data_json = data_to_json(data)  # 将数据转换为 JSON 字符串并发送
+async def send_espnow():
+    global binary_data, gamepad_data, peer
 
-    data_json = json.dumps(data)      # 将列表直接转换为 JSON 字符串
+    while True:
+        binary_data  = gamepad.read_bin()
+        gamepad_data = gamepad.data
 
-    now.send(peer, data_json) 
+        # data_json = data_to_json(data)  # 将数据转换为 JSON 字符串并发送
 
-    print(f"发送数据: {data}") 
+        data_json = json.dumps(gamepad_data)      # 将列表直接转换为 JSON 字符串
 
-    diff = main_dt.time_diff() 
-     
-    print(f"延迟ms: {diff / 1000_000}, 频率Hz: {1_000_000_000 / diff}")
+        now.send(peer, data_json) 
 
+        print(f"发送数据: {gamepad_data}") 
 
-while True:
-    main(main)
-    time.sleep(0.01)
-
-# # 开启定时器
-# tim = Timer(1)
-
-# @debounce(100_000_000)
-# def stop_btn_callback(pin):
-#     if pin.value() == 0:
-#         tim.deinit()
-#         print("停止定时器")  # 不然Thonny无法停止程序
+        diff = main_dt.time_diff() 
+        
+        print(f"延迟ms: {diff / 1000_000}, 频率Hz: {1_000_000_000 / diff}")
+        
+        await asyncio.sleep(0.001) 
 
 
-# stop_btn = Pin(0, Pin.IN, Pin.PULL_UP)
-# stop_btn.irq(stop_btn_callback, Pin.IRQ_FALLING)
+async def main():
+    await asyncio.gather(
+        send_espnow(),  # 启动读取 espnow 的任务
+        show_lcd(),     # 启动显示 lcd 的任务
+    )
 
-# tim.init(period=10, mode=Timer.PERIODIC, callback=main)
+# 运行主协程
+asyncio.run(main())
