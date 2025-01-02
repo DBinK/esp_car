@@ -4,6 +4,14 @@ def limit_value(value, min_value=-3000, max_value=3000):
     """限制输入的值在给定的范围内。"""
     return min(max(value, min_value), max_value)
 
+def map_value(value, original_block, target_block):
+    """将给定的值映射到给定的目标范围。"""
+    original_min, original_max = original_block
+    target_min, target_max     = target_block
+    # 计算映射后的值
+    mapped_value = target_max + (value - original_min) * (target_min - target_max) / (original_max - original_min)
+
+    return mapped_value
 
 def time_diff(last_time=[None]):
     """计算两次调用之间的时间差，单位为微秒。"""
