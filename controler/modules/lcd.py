@@ -2,6 +2,8 @@
 import lib.tft_config as tft_config
 import lib.vga1_8x16 as font
 
+import modules.crc as crc8
+
 tft = tft_config.config(tft_config.WIDE)
 
 tft.rotation(0)
@@ -9,12 +11,14 @@ tft.fill(0)
 
 tft.text(
     font,
-    f"Hello gamepad!",
+    "Hello gamepad!",
     80, 200
 )
 tft.fill(0)
 
 def show_gamepad(data, bin_str):
+
+    checksum = crc8.crc8(data)
 
     tft.text(
         font,
@@ -44,8 +48,13 @@ def show_gamepad(data, bin_str):
     )
     tft.text(
         font,
-        f"Hex: {bin_str}     ",
+        f"crc8: {bin(checksum)}     ",
         10, 180
+    )
+    tft.text(
+        font,
+        f"Hex: {bin_str}     ",
+        10, 210
     )
 
 if __name__ == "__main__":

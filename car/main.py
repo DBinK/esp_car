@@ -1,11 +1,10 @@
-import struct
 import time
-import asyncio
-import espnow
 import network
 from machine import Pin
 
+from modules.now import read_espnow
 from modules.motion import RobotController
+from modules.utils import map_value
 
 time.sleep(1)  # 防止点停止按钮后马上再启动导致 Thonny 连接不上
 
@@ -14,62 +13,56 @@ time.sleep(1)  # 防止点停止按钮后马上再启动导致 Thonny 连接不�
 robot = RobotController()
 
 # 初始化 LED
-led = Pin(15, Pin.OUT, value=1)
+led = Pin(46, Pin.OUT, value=1)
 
-# 初始化 WiFi 和 espnow
-sta = network.WLAN(network.STA_IF)
-sta.active(True)
-sta.disconnect()  # 因为 ESP8266 会自动连接到最后一个接入点
+DEAD_AREA = 20  # 摇杆死区
+MAP_COEFF = 58  # 摇杆映射系数 (根据实际需求调整)
 
-now = espnow.ESPNow()
-now.active(True)  # 连接dk广播地址
-now.add_peer(b"\xff\xff\xff\xff\xff\xff")
+while True:
+    time.sleep(0.001)
+    data = read_espnow()
+    if data:
 
-# 初始化停止按钮
-def stop_btn_callback(pin):
-    global sw
-    time.sleep(0.1)
-    if pin.value() == 0:
-        sw = not sw
-        led.value(not led.value())
-        print("停止定时器")  # 不然Thonny无法停止程序
+        lx = data[1]  
+        ly = data[2]
+        rx = data[3]
+        ry = data[4]
 
+        print(f"原始数据: lx={lx}, ly={ly}, rx={rx}, ry={ry}")
 
-stop_btn = Pin(0, Pin.IN, Pin.PULL_UP)
-stop_btn.irq(stop_btn_callback, Pin.IRQ_FALLING)
+        lx += 16
+        ly += 35
+        rx += 16
+        ry += 16
 
+        print(f"矫正后数据: lx={lx}, ly={ly}, rx={rx}, ry={ry}")
 
-async def read_espnow():
-    """读取espnow数据并进行解包处理"""
-    while True:
-        # print("正在读取espnow数据...")
-        host, msg = now.recv()  # 读取所有可用的数据
-        process_espnow_data(msg)  # 处理接收到的数据
+        # 检查lx, ly, rx, ry中是否至少有一个绝对值超过设定值
+        stick_work = (
+               abs(lx-127) > DEAD_AREA
+            or abs(ly-127) > DEAD_AREA
+            or abs(rx-127) > DEAD_AREA
+            or abs(ry-127) > DEAD_AREA
+        )
 
-        await asyncio.sleep(0.001)  # 等待一段时间再检查
+        if stick_work:
+            led.value(not led.value())  # 闪烁led
 
+            # 底盘控制
+            v_x = map_value(ly, (0, 255), (-100, 100))  if abs(ly-127) > DEAD_AREA else 0
+            v_y = map_value(lx, (0, 255), (-100, 100))  if abs(lx-127) > DEAD_AREA else 0
+            v_w = map_value(rx, (0, 255), (-100, 100))  if abs(rx-127) > DEAD_AREA else 0
 
-def process_espnow_data(msg):
-    pass
+            print(f"摇杆转速度 v_x={v_x}, v_y={v_y}, v_w={v_w}")
 
+            v_x *= 0.8
+            v_y *= 1.6
+            v_w *= 0.8
+            
+            print(f"输入运动方程 v_x={v_x}, v_y={v_y}, v_w={v_w}")
 
-def process_uart_data(data):
-    # 检查数据长度
-    # 解包数据
-    try:
-        pass
+            robot.move(v_x, -v_y, -v_w)  # 调用移动函数
 
-    except Exception as e:
-        print(f"解包数据时出错: {e}")
-
-
-async def main():
-    await asyncio.gather(
-        # read_uart(),   # 启动读取 UART 的任务
-        read_espnow(),  # 启动读取 espnow 的任务
-    )
-
-
-# 运行主协程
-asyncio.run(main())
-
+        else:
+            robot.move(0, 0, 0)
+            led.value(0)

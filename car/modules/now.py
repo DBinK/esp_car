@@ -2,7 +2,7 @@
 import time
 import json
 import struct
-from controler.modules import gamepad
+
 import espnow
 import network
 
@@ -22,7 +22,7 @@ def read_espnow():
     """读取espnow数据并进行解包处理"""
     host, msg = now.recv(5)  # 读取所有可用的数据, 参数: 超时时间ms
 
-    print("espnow数据:", msg)
+    #print("espnow数据:", msg)
 
     if msg:  # 如果没有数据，则返回
         # 假设 msg 是字节串，需要先解码为字符串

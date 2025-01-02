@@ -21,4 +21,4 @@ def release_all_GPIO():
 
 release_all_GPIO()
 
-led = Pin(15, Pin.OUT, value=1) # 点亮板载led
+led = Pin(46, Pin.OUT, value=1) # 点亮板载led
